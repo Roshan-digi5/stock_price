@@ -188,20 +188,5 @@ else:
         st.dataframe(monthly_display[['Date', 'Company', 'Open', 'Close', 'Monthly Change (%)']],
                      use_container_width=True)
 
-        # Quick insights
-        st.subheader("Quick Insights")
-        if not summary_df.empty:
-            col1, col2, col3 = st.columns(3)
-            with col1:
-                best_stock = summary_df.loc[summary_df['Avg Monthly Change (%)'].idxmax()]
-                st.metric("Best Avg Return",
-                          f"{best_stock['Avg Monthly Change (%)']:.2f}%",
-                          best_stock['Company'])
-            with col2:
-                worst_stock = summary_df.loc[summary_df['Avg Monthly Change (%)'].idxmin()]
-                st.metric("Worst Avg Return",
-                          f"{worst_stock['Avg Monthly Change (%)']:.2f}%",
-                          worst_stock['Company'])
-            with col3:
-                total_months = monthly_df['Company'].value_counts().max()
-                st.metric("Months Analyzed", total_months)
+
+
