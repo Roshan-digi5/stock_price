@@ -46,7 +46,6 @@ start_date = end_date - timedelta(days=period_options[selected_period])
 # Download and process data
 @st.cache_data(ttl=3600)
 def get_stock_data(symbols, start_date, end_date):
-    all_monthly_data = []
     summary_data = []
 
     for symbol in symbols:
@@ -65,15 +64,6 @@ def get_stock_data(symbols, start_date, end_date):
             monthly_pct_change = monthly_pct_change.fillna(0)
 
             company = stock_data.get(symbol, "N/A")
-
-            monthly_data = pd.DataFrame({
-                'Date': monthly_close.index,
-                'Company': company,
-                'Open': monthly_open.values,
-                'Close': monthly_close.values,
-                'Monthly Change (%)': monthly_pct_change.values
-            })
-            all_monthly_data.append(monthly_data)
 
             # Summary stats
             if len(monthly_pct_change) > 1:
@@ -105,10 +95,9 @@ def get_stock_data(symbols, start_date, end_date):
         except Exception as e:
             st.error(f"Error fetching data for {stock_data.get(symbol)}: {str(e)}")
 
-    monthly_df = pd.concat(all_monthly_data, ignore_index=True) if all_monthly_data else pd.DataFrame()
     summary_df = pd.DataFrame(summary_data) if summary_data else pd.DataFrame()
 
-    return monthly_df, summary_df
+    return summary_df
 
 # Main content
 st.title("Stock Monthly Performance Analysis")
@@ -119,32 +108,19 @@ else:
     st.markdown(f"Analysis from {start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}")
 
     with st.spinner("Downloading stock data..."):
-        monthly_df, summary_df = get_stock_data(selected_symbols, start_date, end_date)
+        summary_df = get_stock_data(selected_symbols, start_date, end_date)
 
-    if monthly_df.empty:
+    if summary_df.empty:
         st.error("Failed to fetch data for the selected companies. Please try different ones.")
     else:
-        # Summary table
+        # Summary table only
         st.subheader("Summary Statistics")
-        if not summary_df.empty:
-            summary_display = summary_df.copy()
-            summary_display['Avg Monthly Change (%)'] = summary_display['Avg Monthly Change (%)'].round(2)
-            summary_display['Volatility (Std Dev)'] = summary_display['Volatility (Std Dev)'].round(2)
-            summary_display['Highest Monthly Change (%)'] = summary_display['Highest Monthly Change (%)'].round(2)
-            summary_display['Lowest Monthly Change (%)'] = summary_display['Lowest Monthly Change (%)'].round(2)
-            st.dataframe(summary_display, use_container_width=True)
-        else:
-            st.info("No summary data available.")
-
-        # Monthly table
-        st.subheader("Monthly Performance Data")
-        monthly_display = monthly_df.copy()
-        monthly_display['Open'] = monthly_display['Open'].round(2)
-        monthly_display['Close'] = monthly_display['Close'].round(2)
-        monthly_display['Monthly Change (%)'] = monthly_display['Monthly Change (%)'].round(2)
-        monthly_display['Date'] = monthly_display['Date'].dt.strftime('%Y-%m-%d')
-        st.dataframe(monthly_display[['Date', 'Company', 'Open', 'Close', 'Monthly Change (%)']],
-                     use_container_width=True)
+        summary_display = summary_df.copy()
+        summary_display['Avg Monthly Change (%)'] = summary_display['Avg Monthly Change (%)'].round(2)
+        summary_display['Volatility (Std Dev)'] = summary_display['Volatility (Std Dev)'].round(2)
+        summary_display['Highest Monthly Change (%)'] = summary_display['Highest Monthly Change (%)'].round(2)
+        summary_display['Lowest Monthly Change (%)'] = summary_display['Lowest Monthly Change (%)'].round(2)
+        st.dataframe(summary_display, use_container_width=True)
 
 
 
