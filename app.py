@@ -11,7 +11,7 @@ st.set_page_config(
 )
 
 # --- Stock Data ---
-stock_data = {
+stock_data = {'^NSEI': 'Nifty 50 Index',
     'RELIANCE.NS': 'Reliance Industries Limited',
     'HDFCBANK.NS': 'HDFC Bank Limited',
     'BHARTIARTL.NS': 'Bharti Airtel Limited',
@@ -213,4 +213,5 @@ else:
     # Display only summary table
     st.subheader("Summary Statistics of All Stocks")
     st.dataframe(summary_df.sort_values(by='Avg Monthly Change (%)', ascending=False), use_container_width=True)
+
 
